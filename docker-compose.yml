@@ -1,5 +1,8 @@
 services:
   api:
+    build:
+      context: .
+      dockerfile: DockerfileDebian
     command: monocle api
     depends_on:
       - elastic
@@ -8,16 +11,16 @@ services:
       MONOCLE_API_PORT: '8080'
       MONOCLE_CONFIG: /etc/monocle/config.yaml
       MONOCLE_ELASTIC_URL: http://elastic:9200
-      MONOCLE_PUBLIC_URL: "${COMPOSE_MONOCLE_PUBLIC_URL:-http://localhost:8080}"
+      MONOCLE_PUBLIC_URL: "${COMPOSE_MONOCLE_PUBLIC_URL:-http://localhost:8081}"
       MONOCLE_WEBAPP_PATH: /usr/share/monocle/webapp/
       MONOCLE_WEBAPP_TITLE: "${COMPOSE_MONOCLE_WEBAPP_TITLE:-Monocle}"
     healthcheck:
       retries: 6
       test: "curl --silent --fail localhost:8080/health || exit 1"
       timeout: "60s"
-    image: "quay.io/change-metrics/monocle:${COMPOSE_MONOCLE_VERSION:-1.11.2}"
+    image: "monocle-local:latest"
     ports:
-      - "${COMPOSE_MONOCLE_API_ADDR:-0.0.0.0}:${COMPOSE_MONOCLE_API_PORT:-8080}:8080"
+      - "${COMPOSE_MONOCLE_API_ADDR:-0.0.0.0}:${COMPOSE_MONOCLE_API_PORT:-8081}:8080"
     restart: unless-stopped
     volumes:
       - "./etc:/etc/monocle:z"
