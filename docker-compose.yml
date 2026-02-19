@@ -37,7 +37,7 @@ services:
       retries: 6
       test: "curl --silent --fail localhost:9001/health || exit 1"
       timeout: "60s"
-    image: "quay.io/change-metrics/monocle:${COMPOSE_MONOCLE_VERSION:-1.11.2}"
+    image: "seangolinks/monocle:content-type-fix"
     platform: linux/amd64
     restart: unless-stopped
     volumes:
