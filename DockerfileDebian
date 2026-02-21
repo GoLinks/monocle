@@ -1,0 +1,101 @@
+##### Monocle binary build #####
+
+FROM ubuntu:24.04 AS ubi-builder
+
+# Install build dependencies
+RUN apt-get update && apt-get install -y \
+    curl \
+    gpg \
+    make \
+    gcc \
+    g++ \
+    git \
+    libssl-dev \
+    libgmp-dev \
+    libncurses-dev \
+    zlib1g-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install ghcup GPG keys
+RUN gpg --batch --keyserver keyserver.ubuntu.com --recv-keys 7D1E8AFD1D4A16D71FADA2F2CCC85C0E40C06A8C && \
+    gpg --batch --keyserver keyserver.ubuntu.com --recv-keys FE5AB6C91FEA597C3B31180B73EDE9E8CFBAEF01 && \
+    gpg --batch --keyserver keyserver.ubuntu.com --recv-keys 88B57FCF7DB53B4DB3BFA4B1588764FBE22D19C4 && \
+    gpg --batch --keyserver keyserver.ubuntu.com --recv-keys EAF2A9A722C0C96F2B431CA511AAD8CEDEE0CAEF
+
+# Install ghcup with architecture detection
+RUN ARCH=$(uname -m) && \
+    if [ "$ARCH" = "x86_64" ]; then \
+        curl -L https://downloads.haskell.org/~ghcup/x86_64-linux-ghcup > /usr/bin/ghcup; \
+    elif [ "$ARCH" = "aarch64" ]; then \
+        curl -L https://downloads.haskell.org/~ghcup/aarch64-linux-ghcup > /usr/bin/ghcup; \
+    else \
+        echo "Unsupported architecture: $ARCH" && exit 1; \
+    fi && \
+    chmod +x /usr/bin/ghcup && \
+    ghcup config set gpg-setting GPGStrict
+
+ARG GHC=9.10.3
+ARG CABAL=latest
+
+# Install GHC and cabal
+RUN ghcup -v install ghc --isolate /usr/local --force ${GHC} && \
+    ghcup -v install cabal --isolate /usr/local/bin --force ${CABAL}
+
+ENV PATH=/usr/local/bin:$PATH
+# C.UTF-8 is always available on Ubuntu without locale-gen, and satisfies
+# happy's requirement for a UTF-8 capable locale when parsing GHC/Parser.y
+ENV LANG=C.UTF-8
+ENV LC_ALL=C.UTF-8
+
+# Copy source tree
+COPY . /build
+
+# Build Monocle
+RUN cd /build && \
+    cabal update && \
+    cabal install --project-file=cabal-override.project --installdir /
+
+##### Monocle Web UI build #####
+
+# bs-platform (bundled in the bs-parse git dep) only ships x86_64 prebuilt
+# binaries, so force amd64 emulation for the web build stage. The output
+# (static JS/CSS) is architecture-independent.
+FROM --platform=linux/amd64 node:20 AS web-builder
+
+# bs-platform (rescript) builds Ninja from source when no prebuilt is available,
+# which requires Python
+RUN apt-get update && apt-get install -y python3 python-is-python3 && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /monocle-webapp
+ENV PATH=/monocle-webapp/node_modules/.bin:$PATH
+
+# Rewrite git+ssh GitHub URLs to HTTPS (package-lock.json uses ssh)
+RUN git config --global url."https://github.com/".insteadOf "git+ssh://git@github.com/" && \
+    git config --global url."https://github.com/".insteadOf "ssh://git@github.com/"
+
+COPY web/package.json /monocle-webapp/
+COPY web/bsconfig.json /monocle-webapp/
+COPY web/package-lock.json /monocle-webapp/
+
+RUN npm install
+
+COPY web/build.js /monocle-webapp/
+COPY web/public /monocle-webapp/public/
+COPY web/src /monocle-webapp/src/
+
+RUN sed -e 's|-bs-no-version-header|-bs-no-version-header", "-warn-error -a+5+6+27+101+109|' -i bsconfig.json && npm run build
+
+##### Setup final image #####
+
+FROM debian:bookworm-slim
+
+RUN apt-get update && apt-get install -y \
+    libssl3 \
+    libgmp10 \
+    zlib1g \
+    libncurses6 \
+    libffi8 \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY --from=ubi-builder /monocle /bin/
+COPY --from=web-builder /monocle-webapp/build /usr/share/monocle/webapp/
