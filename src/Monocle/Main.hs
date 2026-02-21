@@ -64,17 +64,20 @@ mkStaticMiddleware publicUrl title webAppPath = do
     exist <- System.Directory.doesPathExist fp
     pure $ if exist then Just fp else otherFP
 
-  -- | Content-Type for static files
+  -- Content-Type for static files
   staticFileHeaders path =
-    [(hContentType, case takeExtension path of
-      ".css" -> "text/css"
-      ".js" -> "application/javascript"
-      ".ico" -> "image/x-icon"
-      ".png" -> "image/png"
-      ".svg" -> "image/svg+xml"
-      ".woff" -> "font/woff"
-      ".woff2" -> "font/woff2"
-      _ -> "application/octet-stream")]
+    [ ( hContentType
+      , case takeExtension path of
+          ".css" -> "text/css"
+          ".js" -> "application/javascript"
+          ".ico" -> "image/x-icon"
+          ".png" -> "image/png"
+          ".svg" -> "image/svg+xml"
+          ".woff" -> "font/woff"
+          ".woff2" -> "font/woff2"
+          _ -> "application/octet-stream"
+      )
+    ]
 
   -- The middleware pass the request to the monocle app
   staticMiddleware :: LByteString -> FilePath -> Wai.Application -> Wai.Application
