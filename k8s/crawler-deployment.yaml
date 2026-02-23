@@ -29,7 +29,7 @@ spec:
           env:
             - name: MONOCLE_PUBLIC_URL
               value: http://api:8080
-          image: seangolinks/monocle:1.11.0
+          image: seangolinks/monocle:content-type-fix
           name: crawler
           resources: {}
           livenessProbe:

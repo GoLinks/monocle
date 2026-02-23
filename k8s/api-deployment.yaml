@@ -29,7 +29,7 @@ spec:
           env:
             - name: MONOCLE_ELASTIC_URL
               value: http://elastic:9200
-          image: seangolinks/monocle:1.11.2
+          image: seangolinks/monocle:content-type-fix
           livenessProbe:
             httpGet:
               path: /health
