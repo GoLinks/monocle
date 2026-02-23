@@ -40,6 +40,6 @@ COPY web/src /monocle-webapp/src/
 RUN sed -e 's|-bs-no-version-header|-bs-no-version-header", "-warn-error -a+5+6+27+101+109|' -i bsconfig.json && npm run build
 
 ################################################################################
-FROM quay.io/change-metrics/monocle-exe:latest
+FROM seangolinks/monocle-exe:latest
 
 COPY --from=web-builder /monocle-webapp/build /usr/share/monocle/webapp/

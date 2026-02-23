@@ -687,14 +687,14 @@ To setup the monitoring:
 export API_TARGET=localhost:8080
 export CRAWLER_TARGET=localhost:9001
 mkdir -p /srv/prometheus
-podman create --network host -v /srv/prometheus:/var/lib/prometheus:Z -e API_TARGET=${API_TARGET} -e CRAWLER_TARGET=${CRAWLER_TARGET} --name monocle-prometheus quay.io/change-metrics/monocle-prometheus:latest
+podman create --network host -v /srv/prometheus:/var/lib/prometheus:Z -e API_TARGET=${API_TARGET} -e CRAWLER_TARGET=${CRAWLER_TARGET} --name monocle-prometheus seangolinks/monocle-prometheus:latest
 ```
 
 2. Create the grafana service (on the prometheus host)
 
 ```ShellSession
 mkdir -p /srv/grafana
-podman create --network host -v /srv/grafana:/var/lib/grafana:Z -e GRAFANA_PASS=secret --name monocle-grafana quay.io/change-metrics/monocle-grafana:latest
+podman create --network host -v /srv/grafana:/var/lib/grafana:Z -e GRAFANA_PASS=secret --name monocle-grafana seangolinks/monocle-grafana:latest
 ```
 
 3. Starts the services with systemd

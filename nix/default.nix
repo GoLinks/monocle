@@ -249,7 +249,7 @@ in rec {
   '';
 
   promContainer = pkgs.dockerTools.buildLayeredImage {
-    name = "quay.io/change-metrics/monocle-prometheus";
+    name = "seangolinks/monocle-prometheus";
     contents = [ pkgs.coreutils pkgs.gnused pkgs.findutils ];
     tag = "latest";
     # created = "now";
@@ -354,7 +354,7 @@ in rec {
   '';
 
   grafanaContainer = pkgs.dockerTools.buildLayeredImage {
-    name = "quay.io/change-metrics/monocle-grafana";
+    name = "seangolinks/monocle-grafana";
     tag = "latest";
     # created = "now";
     contents = [ pkgs.coreutils pkgs.gnused pkgs.findutils ];
@@ -548,7 +548,7 @@ in rec {
     binSh = "ln -s /usr/bin/sh bin/sh";
 
   in pkgs.dockerTools.buildLayeredImage {
-    name = "quay.io/change-metrics/monocle-exe";
+    name = "seangolinks/monocle-exe";
     contents = [ monocle-wrapper ];
     extraCommands = "${createPasswd} && ${rwHome} && ${binSh}";
     tag = "latest";

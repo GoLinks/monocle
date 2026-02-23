@@ -41,7 +41,7 @@ jobs:
       - name: Build monocle-exe container
         run: "nix build .#containerMonocle; docker load < ./result"
       - name: Build docker image
-        run: docker build -t quay.io/change-metrics/monocle:latest .
+        run: docker build -t seangolinks/monocle:latest .
       - name: Set Monocle compose image to latest
         run: "echo \"COMPOSE_MONOCLE_VERSION=latest\" > .env"
       - name: Start Monocle compose
@@ -64,11 +64,11 @@ jobs:
       - name: Display tag name
         run: "echo \"Discovered tag: $GIT_TAG_NAME\""
       - name: Tag the container image
-        run: "docker tag quay.io/change-metrics/monocle:latest quay.io/change-metrics/monocle:$GIT_TAG_NAME"
-      - name: Login on quay.io
-        run: "docker login -u \"${{ secrets.QUAYIO_USERNAME }}\" -p \"${{ secrets.QUAYIO_PASSWORD }}\" quay.io"
-      - name: Publish image to quay.io
-        run: "docker push quay.io/change-metrics/monocle:$GIT_TAG_NAME"
+        run: "docker tag seangolinks/monocle:latest seangolinks/monocle:$GIT_TAG_NAME"
+      - name: Login on Docker Hub
+        run: "docker login -u \"${{ secrets.DOCKERHUB_USERNAME }}\" -p \"${{ secrets.DOCKERHUB_PASSWORD }}\""
+      - name: Publish image to Docker Hub
+        run: "docker push seangolinks/monocle:$GIT_TAG_NAME"
 name: Publish Tag Container
 on:
   push:

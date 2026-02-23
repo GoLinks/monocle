@@ -53,13 +53,13 @@ in  { Nix =
         mk.makePublishMaster
           (   mk.validate-compose-steps
             # [ mk.GithubActions.Step::{
-                , name = Some "Login on quay.io"
+                , name = Some "Login on Docker Hub"
                 , run = Some
-                    "docker login -u \"\${{ secrets.QUAYIO_USERNAME }}\" -p \"\${{ secrets.QUAYIO_PASSWORD }}\" quay.io"
+                    "docker login -u \"\${{ secrets.DOCKERHUB_USERNAME }}\" -p \"\${{ secrets.DOCKERHUB_PASSWORD }}\""
                 }
               , mk.GithubActions.Step::{
-                , name = Some "Publish image to quay.io"
-                , run = Some "docker push quay.io/change-metrics/monocle:latest"
+                , name = Some "Publish image to Docker Hub"
+                , run = Some "docker push seangolinks/monocle:latest"
                 }
               ]
           )
@@ -78,17 +78,17 @@ in  { Nix =
               , mk.GithubActions.Step::{
                 , name = Some "Tag the container image"
                 , run = Some
-                    "docker tag quay.io/change-metrics/monocle:latest quay.io/change-metrics/monocle:\$GIT_TAG_NAME"
+                    "docker tag seangolinks/monocle:latest seangolinks/monocle:\$GIT_TAG_NAME"
                 }
               , mk.GithubActions.Step::{
-                , name = Some "Login on quay.io"
+                , name = Some "Login on Docker Hub"
                 , run = Some
-                    "docker login -u \"\${{ secrets.QUAYIO_USERNAME }}\" -p \"\${{ secrets.QUAYIO_PASSWORD }}\" quay.io"
+                    "docker login -u \"\${{ secrets.DOCKERHUB_USERNAME }}\" -p \"\${{ secrets.DOCKERHUB_PASSWORD }}\""
                 }
               , mk.GithubActions.Step::{
-                , name = Some "Publish image to quay.io"
+                , name = Some "Publish image to Docker Hub"
                 , run = Some
-                    "docker push quay.io/change-metrics/monocle:\$GIT_TAG_NAME"
+                    "docker push seangolinks/monocle:\$GIT_TAG_NAME"
                 }
               ]
           )

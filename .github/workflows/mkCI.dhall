@@ -83,7 +83,7 @@ in  { GithubActions
         }
       , GithubActions.Step::{
         , name = Some "Build docker image"
-        , run = Some "docker build -t quay.io/change-metrics/monocle:latest ."
+        , run = Some "docker build -t seangolinks/monocle:latest ."
         }
       , GithubActions.Step::{
         , name = Some "Set Monocle compose image to latest"
